@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/IoTApp.iml" filepath="$PROJECT_DIR$/IoTApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MCS-Android-SDK.iml" filepath="$PROJECT_DIR$/MCS-Android-SDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/McsTutorialProject/McsTutorialProject.iml" filepath="$PROJECT_DIR$/McsTutorialProject/McsTutorialProject.iml" />
     </modules>
   </component>
 </project>
