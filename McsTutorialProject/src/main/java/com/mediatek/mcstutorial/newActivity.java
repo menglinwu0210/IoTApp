@@ -37,8 +37,10 @@ import com.mediatek.mcs.net.RequestManager;
 import com.mediatek.mcs.socket.McsSocketListener;
 import com.mediatek.mcs.socket.SocketManager;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Exchanger;
@@ -53,8 +55,8 @@ public class newActivity extends AppCompatActivity {
     DeviceInfoEntity mDeviceInfo;
     McsDataChannel mDataChannel;
     TextView condition, comfort, health, all;
-    Button button;
-    List<Float> data = new LinkedList<Float>();
+    ImageButton btn;
+    Map<String, Float> data = new HashMap<String, Float>();
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -62,6 +64,7 @@ public class newActivity extends AppCompatActivity {
      */
     private GoogleApiClient client;
     private TimerTask timer;
+    private Runnable runner;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,22 +73,37 @@ public class newActivity extends AppCompatActivity {
         this.comfort = (TextView) findViewById((R.id.comfort));
         this.health = (TextView) findViewById((R.id.health));
         this.all = (TextView) findViewById(R.id.all);
-        button = (Button) findViewById(R.id.button);
+        btn = (ImageButton) findViewById(R.id.btn);
         final Intent intent = new Intent(newActivity.this, SessionActivity.class);
         startActivity(intent);
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
-        start_req();
 
-        button.setOnClickListener(new View.OnClickListener() {
+        requestDevices();
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable(){
+            @Override
+            public void run() {
+                requestDeviceInfo(mDeviceId);
+            }}, 2000);
+//        Intent i = new Intent(newActivity.this, IntentServiceMCS.class);
+//        Bundle b = new Bundle();
+//        b.putString("id", mDeviceId);
+//        i.putExtras(b);
+//        startActivity(i);
+
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                start_req();
+               requestDeviceInfo(mDeviceId);
             }
         });
+
     }
+
 
 
     @Override
@@ -154,19 +172,18 @@ public class newActivity extends AppCompatActivity {
                                 .fromJson(response.toString(), DeviceInfoEntity.class)
                                 .getResults().get(0);
                         List<DataChannelEntity> d = mDeviceInfo.getDataChannels();
-                        all.setText(String.valueOf(d.size()));
+
                         if(d != null){
                             for(int i = 0; i < d.size(); i++){
-                                if(d.get(i).getDataPoint() == null){
-                                    float a = 0;
-                                    data.add(a);
-                                }
-                                else{
+                                if(d.get(i).getDataPoint() != null){
+                                    String s = d.get(i).getDataChnId();
                                     float value = Float.valueOf(d.get(i).getDataPoint().getValues().getValue());
-                                    data.add(value);
+                                    data.put(s,value);
+
                                 }
                             }
                         }
+
                         else Toast.makeText(newActivity.this, "No data to show", Toast.LENGTH_SHORT).show();
                         calculate();
 
@@ -190,74 +207,75 @@ public class newActivity extends AppCompatActivity {
         SocketManager.disconnectSocket();
     }
 
-    private void start_req(){
-        requestDevices();
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                requestDeviceInfo(mDeviceId);
-            }
-        }, 3000);
-    }
+
 
     private void calculate(){
 
-      float inA = data.get(2);
-      float outA = data.get(3);
-      float inB = data.get(1);
-      float outB = data.get(4);
-      float inC = data.get(0);
-      float outC = data.get(5);
-      float temp = data.get(7);
-      float hum =  data.get(6);
+      float outA = data.get("fsr_3");
+      float inA = data.get("fsr_4");
+      float outB = data.get("fsr_2");
+      float inB = data.get("fsr_5");
+      float outC = data.get("fsr_1");
+      float inC = data.get("fsr_6");
+      float temp = data.get("temp");
+      float hum =  data.get("hum");
       float A = inA + outA;
       float B = inB + outB;
       float C = inC + outC;
       float in = inA + inB + inC;
       float out = outA + outB + outC;
-      float arch = B/(A+B+C);
-      float dir = in/out;
-      int total = 10;
-      if((temp > 26 && temp < 30) || hum > 60){
-          comfort.setText("不適");
-          total -= 3;
-      }
-      else if(temp > 30|| hum > 88){
-          comfort.setText("極度不適");
-          total -= 5;
-      }
-      else comfort.setText("舒適");
 
-      if(A < 100 || C < 100){  //walking
-        condition.setText("站立");
-        if(arch > 0.26){
-            health.setText("足弓過低(扁平)");
-            total -= 5;
-        }
-        else if(arch < 0.21){
-            health.setText("足弓過高");
-            total -= 5;
-        }
-        else health.setText("健康");
+      if(A == 0 && B == 0 && C == 0){
+          all.setText("尚無資料");
+          condition.setText("");
+          health.setText("");
+          comfort.setText("");
       }
+
       else{
-          condition.setText("步行");
-          if(dir > 0.5){
-              health.setText("內八");
+          float arch = B/(A+B+C);
+          float dir = in/out;
+          int total = 10;
+
+          if((temp > 28 && temp < 30) && hum > 60){
+              comfort.setText("不適");
+              total -= 3;
+          }
+          else if(temp > 30 && hum > 88){
+              comfort.setText("極度不適");
               total -= 5;
           }
-          else if(dir < 0.5){
-              health.setText("外八");
-              total -= 5;
+          else comfort.setText("舒適");
+
+          if(A > 0 && B > 0 && C > 0){
+              condition.setText("站立");
+              if(arch > 0.3){
+                  health.setText("足弓過低");
+                  total -= 5;
+              }
+              else if(arch < 0.15){
+                  health.setText("足弓過高");
+                  total -= 5;
+              }
+              else health.setText("健康");
           }
-          else health.setText("健康");
+          else{
+              condition.setText("步行");
+              if(out == 0){
+                  health.setText("內八");
+                  total -= 5;
+              }
+              else if(in == 0){
+                  health.setText("外八");
+                  total -= 5;
+              }
+              else health.setText("健康");
+          }
+
+          all.setText(String.valueOf(C));
       }
 
-      all.setText(String.valueOf(total) + " / 10");
-
-
-
+      for(int i = 0; i < data.size(); i++) data.remove(i);
 
 
 

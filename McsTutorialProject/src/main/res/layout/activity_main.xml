@@ -110,6 +110,6 @@
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="27dp"
-        android:src="@mipmap/again" />
+        android:src="@mipmap/again02" />
 
 </RelativeLayout>

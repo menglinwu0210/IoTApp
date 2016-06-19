@@ -22,7 +22,6 @@
         android:id="@+id/imageView"
         android:src="@mipmap/title"
         android:layout_below="@+id/start"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="65dp" />
+        android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
