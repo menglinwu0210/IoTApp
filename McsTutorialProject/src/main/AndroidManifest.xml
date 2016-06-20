@@ -61,7 +61,7 @@
     <!-- Customize your own notification icon -->
     <meta-data
         android:name="com.mediatek.mcs.push.notification_icon"
-        android:resource="@mipmap/ic_launcher"
+        android:resource="@mipmap/icon"
         />
     <activity
         android:name=".FirstActivity"

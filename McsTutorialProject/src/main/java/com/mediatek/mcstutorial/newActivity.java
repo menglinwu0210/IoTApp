@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -49,7 +50,7 @@ import java.util.concurrent.RunnableFuture;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class newActivity extends AppCompatActivity {
+public class newActivity extends FragmentActivity {
 
     String mDeviceId = "";
     DeviceInfoEntity mDeviceInfo;
@@ -272,7 +273,7 @@ public class newActivity extends AppCompatActivity {
               else health.setText("健康");
           }
 
-          all.setText(String.valueOf(C));
+          all.setText(String.valueOf(total) + " / 10");
       }
 
       for(int i = 0; i < data.size(); i++) data.remove(i);
